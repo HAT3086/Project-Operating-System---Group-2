@@ -1,0 +1,7 @@
+/ossim/build/
+/ossim/ossim
+*.o
+*.exe
+.DS_Store
+__MACOSX/
+._*

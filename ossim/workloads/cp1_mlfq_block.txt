@@ -1,0 +1,10 @@
+# P1 blocks before its level-1 quantum ends, and is blocked during t=20's
+# boost. It must wake at level 0 at t=31, preempt P2, and finish at t=34.
+process P1 arrive=0 pages=1
+    cpu 4
+    io 25
+    cpu 3
+end
+process P2 arrive=0 pages=1
+    cpu 30
+end

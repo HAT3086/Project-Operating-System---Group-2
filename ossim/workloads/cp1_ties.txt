@@ -1,0 +1,11 @@
+# At t=1 P1 has 3 ticks left, equal to the arriving P2's burst.
+# SRTF must keep P1. P2 and P3 tie at arrival=1 and burst=3: FIFO.
+process P1 arrive=0 prio=1 pages=1
+    cpu 4
+end
+process P2 arrive=1 prio=1 pages=1
+    cpu 3
+end
+process P3 arrive=1 prio=2 pages=1
+    cpu 3
+end

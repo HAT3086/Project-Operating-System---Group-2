@@ -1,0 +1,14 @@
+mkdir -p build
+gcc -std=c99 -Wall -Wextra -Werror -O2 -g -Iinclude -c -o build/disk.o src/disk.c
+gcc -std=c99 -Wall -Wextra -Werror -O2 -g -Iinclude -c -o build/event.o src/event.c
+gcc -std=c99 -Wall -Wextra -Werror -O2 -g -Iinclude -c -o build/kernel.o src/kernel.c
+gcc -std=c99 -Wall -Wextra -Werror -O2 -g -Iinclude -c -o build/main.o src/main.c
+gcc -std=c99 -Wall -Wextra -Werror -O2 -g -Iinclude -c -o build/mem.o src/mem.c
+gcc -std=c99 -Wall -Wextra -Werror -O2 -g -Iinclude -c -o build/metrics.o src/metrics.c
+gcc -std=c99 -Wall -Wextra -Werror -O2 -g -Iinclude -c -o build/process.o src/process.c
+gcc -std=c99 -Wall -Wextra -Werror -O2 -g -Iinclude -c -o build/queue.o src/queue.c
+gcc -std=c99 -Wall -Wextra -Werror -O2 -g -Iinclude -c -o build/sched.o src/sched.c
+gcc -std=c99 -Wall -Wextra -Werror -O2 -g -Iinclude -c -o build/sync.o src/sync.c
+gcc -std=c99 -Wall -Wextra -Werror -O2 -g -Iinclude -c -o build/util.o src/util.c
+gcc -std=c99 -Wall -Wextra -Werror -O2 -g -Iinclude -c -o build/workload.o src/workload.c
+gcc -std=c99 -Wall -Wextra -Werror -O2 -g -Iinclude -o ossim build/disk.o build/event.o build/kernel.o build/main.o build/mem.o build/metrics.o build/process.o build/queue.o build/sched.o build/sync.o build/util.o build/workload.o

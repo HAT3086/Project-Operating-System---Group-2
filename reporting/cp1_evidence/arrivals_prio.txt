@@ -1,0 +1,21 @@
+
+=== ossim report: workloads/arrivals.txt | sched=prio q=2 | paging=off frames=64 replace=fifo | disk=fcfs cyl=200 head0=0 ===
+pid  name        arrive   first  finish turnaround  waiting response    cpu faults   disk
+1    J1               0       0      31         31       17        0     11      0      0
+2    J2               2       2      11          9        0        0      9      0      0
+3    J3               4      24      40         36       25       20      6      0      0
+4    J4               6      18      20         14       12       12      2      0      0
+5    J5               8      26      36         28       23       18      5      0      0
+6    J6              12      12      18          6        0        0      6      0      0
+
+CPU timeline (pid, 0 = idle, K = kernel/page-fault handling):
+  [0-1] P1 | [2-10] P2 | [11-11] P1 | [12-17] P6 | [18-19] P4 | [20-23] P1 | [24-25] P3 | [26-26] P5 | [27-30] P1 | [31-31] P3 | [32-35] P5 | [36-36] idle | [37-39] P3 | 
+
+summary
+  ticks=40 finished=6/6 aborted=0
+  cpu_busy=39 cpu_idle=1 cpu_kernel=0 utilization=97.50%
+  throughput=0.1500 procs/tick context_switches=12
+  avg_turnaround=20.67 avg_waiting=12.83 avg_response=8.33
+  mem_refs=0 page_faults=0 evictions=0 fault_rate=0.0000 frame_waits=0
+  disk_requests=0 head_movement=0 avg_disk_wait=0.00 head=0
+  avg_fault_service=0.00

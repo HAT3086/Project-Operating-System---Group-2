@@ -1,0 +1,11 @@
+# q=2: P1 blocks after one tick, so it stays at level 0 with a fresh
+# quantum on wakeup. Expected half-open order: P1 0-1, P2 1-3,
+# P1 3-5, P2 5-9, P1 9-10.
+process P1 arrive=0 pages=1
+    cpu 1
+    io 1
+    cpu 3
+end
+process P2 arrive=0 pages=1
+    cpu 6
+end

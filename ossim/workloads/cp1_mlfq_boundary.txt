@@ -1,0 +1,10 @@
+# q=2: P1 blocks exactly at its quantum boundary, so it wakes at level 1.
+# P2 is still level 0 at t=3 and must not be preempted by P1's wakeup.
+process P1 arrive=0 pages=1
+    cpu 2
+    io 1
+    cpu 1
+end
+process P2 arrive=0 pages=1
+    cpu 3
+end

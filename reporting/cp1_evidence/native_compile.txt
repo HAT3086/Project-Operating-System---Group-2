@@ -1,0 +1,12 @@
+Native Windows compilation check only; WSL make/test is pending.
+gcc.exe (Rev5, Built by MSYS2 project) 16.1.0
+Copyright (C) 2026 Free Software Foundation, Inc.
+This is free software; see the source for copying conditions.  There is NO
+warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+
+
+Command: gcc -std=c99 -Wall -Wextra -Werror -O2 -g -Iinclude -o [scratch]/ossim.exe src/*.c
+Compiler exit status: 0
+Compiler diagnostics: none
+Runtime launch blocked by Windows Application Control (WinError 4551).
+No runtime test passes are claimed.
