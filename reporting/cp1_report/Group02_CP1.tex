@@ -1,0 +1,194 @@
+% COMP2040 Group Project - Checkpoint 1, progress report 1 (Group 2).
+% Overleaf compiler: pdfLaTeX. Limit: at most two pages.
+% Numbers come from reporting/cp1_evidence and a re-run of the same commands.
+\documentclass[10pt,a4paper]{article}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{lmodern}
+\usepackage{textcomp}
+\usepackage[a4paper,left=15mm,right=15mm,top=15mm,bottom=11mm,
+  headheight=12pt,headsep=8pt,footskip=16pt]{geometry}
+\usepackage{amsmath}
+\usepackage{xcolor}
+\usepackage{enumitem}
+\usepackage{listings}
+\usepackage{fancyhdr}
+\usepackage{lastpage}
+\usepackage{titlesec}
+\usepackage{array}
+\usepackage{tabularx}
+\usepackage{booktabs}
+\usepackage[hidelinks,pdftitle={COMP2040 Group 2 - Checkpoint 1 progress report},
+            pdfauthor={Group 2}]{hyperref}
+
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{\small COMP2040 Operating Systems}
+\fancyhead[R]{\small Group Project -- Checkpoint 1}
+\fancyfoot[C]{\small\thepage\ / \pageref{LastPage}}
+\renewcommand{\headrulewidth}{0.4pt}
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{2.5pt}
+\titleformat{\section}{\normalfont\large\bfseries}{\thesection}{0.7em}{}
+\titlespacing*{\section}{0pt}{6pt}{2pt}
+\setlist{leftmargin=1.5em,itemsep=0.5pt,parsep=0pt,topsep=1.5pt,partopsep=0pt}
+\lstdefinestyle{terminal}{basicstyle=\scriptsize\ttfamily,
+  columns=fullflexible,keepspaces=true,showstringspaces=false,
+  frame=l,framerule=1.2pt,rulecolor=\color{black!30},
+  xleftmargin=8pt,framexleftmargin=6pt,aboveskip=2pt,belowskip=2pt,
+  breaklines=true,breakatwhitespace=true,postbreak=\mbox{\hspace{1.5em}},
+  upquote=true,language={}}
+\lstset{style=terminal}
+\newcommand{\code}[1]{\texttt{#1}}
+\renewcommand{\arraystretch}{1.08}
+\setlength{\emergencystretch}{3em}
+
+\begin{document}
+
+\begin{center}
+{\Large\bfseries Group 2 --- Progress Report 1: Scheduling and Deadlock}\\[3pt]
+\begin{tabular}{lll}
+Nguyen Quang Huy (V202401400) & Hoang Anh Tu (V202401388) & Vu Hoang Giang (V202401411)
+\end{tabular}\\[2pt]
+Repository: \url{https://github.com/HAT3086/Project-Operating-System---Group-2}
+\end{center}
+\vspace{-6pt}
+
+\section{Status and compile output}
+All Checkpoint~1 parts are implemented: SJF, SRTF, PRIO and MLFQ in \code{src/sched.c},
+\code{deadlock\_check()} in \code{src/sync.c}, and hand-computed checks in \code{tests/run.sh}
+(cases in \code{tests/cp1\_cases.tsv}, inputs in \code{workloads/cp1\_*.txt}).
+No other starter source, header or Makefile was changed. Build on WSL2 (Ubuntu), GCC 15.2.0, GNU Make 4.4.1, with the original
+flags; output of \code{make CC=gcc}, with no warnings:
+\begin{lstlisting}
+mkdir -p build
+gcc -std=c99 -Wall -Wextra -Werror -O2 -g -Iinclude -c -o build/disk.o src/disk.c
+gcc -std=c99 -Wall -Wextra -Werror -O2 -g -Iinclude -c -o build/event.o src/event.c
+gcc -std=c99 -Wall -Wextra -Werror -O2 -g -Iinclude -c -o build/kernel.o src/kernel.c
+gcc -std=c99 -Wall -Wextra -Werror -O2 -g -Iinclude -c -o build/main.o src/main.c
+gcc -std=c99 -Wall -Wextra -Werror -O2 -g -Iinclude -c -o build/mem.o src/mem.c
+gcc -std=c99 -Wall -Wextra -Werror -O2 -g -Iinclude -c -o build/metrics.o src/metrics.c
+gcc -std=c99 -Wall -Wextra -Werror -O2 -g -Iinclude -c -o build/process.o src/process.c
+gcc -std=c99 -Wall -Wextra -Werror -O2 -g -Iinclude -c -o build/queue.o src/queue.c
+gcc -std=c99 -Wall -Wextra -Werror -O2 -g -Iinclude -c -o build/sched.o src/sched.c
+gcc -std=c99 -Wall -Wextra -Werror -O2 -g -Iinclude -c -o build/sync.o src/sync.c
+gcc -std=c99 -Wall -Wextra -Werror -O2 -g -Iinclude -c -o build/util.o src/util.c
+gcc -std=c99 -Wall -Wextra -Werror -O2 -g -Iinclude -c -o build/workload.o src/workload.c
+gcc -std=c99 -Wall -Wextra -Werror -O2 -g -Iinclude -o ossim build/disk.o build/event.o build/kernel.o build/main.o build/mem.o build/metrics.o build/process.o build/queue.o build/sched.o build/sync.o build/util.o build/workload.o
+\end{lstlisting}
+We rebuilt the same tree on Ubuntu 22.04 with GCC 11.4.0: still no warnings, and the same test results.
+
+\section{Scheduler design}
+Every ready queue is the starter's \code{queue\_t}, an array of PCB pointers.
+\code{q\_push()} appends at the tail; \code{q\_pop\_min(q,key)} removes the \emph{earliest-queued}
+process with the smallest key, so equal keys are served FIFO: in order of entering the ready
+queue, not by PID. Preemption is decided in \code{should\_preempt()} before each tick; a preempted process rejoins the tail.
+
+\smallskip
+{\small
+\begin{tabularx}{\linewidth}{@{}l>{\raggedright\arraybackslash}X>{\raggedright\arraybackslash}X>{\raggedright\arraybackslash}p{0.2\linewidth}@{}}
+\toprule
+ & \textbf{Queues and how a process is picked} & \textbf{When it is preempted} & \textbf{Ties}\\
+\midrule
+SJF & One queue; \code{q\_pop\_min} on \code{proc\_burst\_remaining} (the current CPU burst, not total work). & Never (non-preemptive). & FIFO. \\
+SRTF & One queue; same key as SJF. & A READY process has \emph{strictly} fewer remaining burst ticks than the running one. & Equal remaining time keeps the CPU; FIFO pick. \\
+PRIO & One queue; \code{q\_pop\_min} on \code{priority} (smaller = higher). & At once by a higher priority; after \code{q} ticks if an \emph{equal} priority is READY. Lower priorities never force rotation. & FIFO (RR) among equal priorities; each dispatch starts a new quantum. \\
+MLFQ & Three FIFO queues, levels 0--2, quanta \code{q}, \code{2q}, \code{4q}; pick the head of the highest non-empty level. & A higher-level job becomes READY, or the quantum is used up while a job at the same or a higher level is READY. & FIFO within a level. \\
+\bottomrule
+\end{tabularx}}
+
+\textbf{Rules the handout does not fix (our choices; feedback welcome).}
+\begin{enumerate}[label=(\arabic*)]
+\item \textbf{Entry and order.} New processes enter level~0. Every insertion (arrival, wake-up, preemption) goes to the tail.
+\item \textbf{Demotion.} Using the whole quantum moves a process down one level (at most level~2). The check runs right after its last tick, so a process that blocks \emph{exactly} at the boundary still moves down. An earlier block keeps the level, with a fresh quantum on wake-up.
+\item \textbf{Interrupted quantum.} A process preempted by a higher level keeps the ticks it already used of its quantum.
+\item \textbf{Boost.} At the start of ticks 20, 40, \dots, after that tick's events and before scheduling, also while the CPU is idle. Queues merge as Q0, Q1, Q2 (FIFO within each). Blocked processes and quantum counters are reset too; the running process joins the tail if anyone is READY.
+\item \textbf{Zero-time operations.} CPU bursts separated only by zero-time operations keep the CPU (kernel rule) but share one PRIO/MLFQ quantum.
+\item \textbf{PRIO after preemption.} A process preempted by a higher priority gets a fresh quantum when it runs again.
+\end{enumerate}
+
+\section{Deadlock detection}
+\code{deadlock\_check()} runs the multi-instance detection algorithm of textbook Sec.~8.6.2
+(detection, not Banker's avoidance), using each resource's \code{available}, \code{allocated[pid]} and \code{requested[pid]}:
+\begin{enumerate}[label=(\arabic*)]
+\item \textit{Work} $\leftarrow$ \textit{Available}; \textit{Finish[i]} is true only if process $i$ holds nothing.
+\item Find an unfinished $i$ with \textit{Request$_i$} $\le$ \textit{Work}. Add \textit{Allocation$_i$} to \textit{Work}, set \textit{Finish[i]}, repeat.
+\item The unfinished processes are deadlocked. Their PIDs are printed in increasing order, once per unchanged set.
+\end{enumerate}
+The check does not change any state. It runs every \code{-{}-deadlock-every} ticks, and there is no recovery (optional).
+\textbf{Example.} In \code{deadlock.txt}, B blocks on R1 at $t=11$ while holding R2, and A blocks on R2 at $t=12$ while holding R1.
+With checks every 5 ticks the cycle is reported at $t=15$, and C still finishes.
+\textbf{Extra checks.} No report for a temporary wait on one of two instances; a real multi-instance deadlock is reported once, without a waiter that holds nothing.
+
+\section{How we checked: hand computation vs.\ ossim}
+Our own workload \code{workloads/cp1\_hand.txt}, run with \code{-{}-quantum 2 -{}-no-paging}:
+P1 (arrival 0, CPU 6, priority 2), P2 (1, 3, 1), P3 (2, 1, 1). Intervals are half-open (P1 0--2 = ticks 0 and 1).
+CPU-only, so $T=F-A$, $R=S-A$, $W=T-C$ (in general $W$ = ticks spent READY); values are averages over the three processes.
+
+\smallskip
+{\small\setlength{\tabcolsep}{4pt}
+\begin{tabularx}{\linewidth}{@{}l>{\raggedright\arraybackslash}Xcccccc@{}}
+\toprule
+ & \textbf{Hand-computed schedule} & \textbf{W hand} & \textbf{W ossim} & \textbf{R hand} & \textbf{R ossim} & \textbf{T hand} & \textbf{T ossim}\\
+\midrule
+FCFS & P1 0--6, P2 6--9, P3 9--10 & 4.00 & 4.00 & 4.00 & 4.00 & 7.33 & 7.33\\
+RR   & P1 0--2, P2 2--4, P3 4--5, P1 5--7, P2 7--8, P1 8--10 & 3.33 & 3.33 & 1.00 & 1.00 & 6.67 & 6.67\\
+SJF  & P1 0--6, P3 6--7, P2 7--10 & 3.33 & 3.33 & 3.33 & 3.33 & 6.67 & 6.67\\
+SRTF & P1 0--1, P2 1--2, P3 2--3, P2 3--5, P1 5--10 & 1.67 & 1.67 & 0.00 & 0.00 & 5.00 & 5.00\\
+PRIO & P1 0--1, P2 1--3, P3 3--4, P2 4--5, P1 5--10 & 2.00 & 2.00 & 0.33 & 0.33 & 5.33 & 5.33\\
+MLFQ & P1 0--2, P2 2--4, P3 4--5, P1 5--9, P2 9--10 & 3.67 & 3.67 & 1.00 & 1.00 & 7.00 & 7.00\\
+\bottomrule
+\end{tabularx}}
+
+\textit{Example (PRIO).} P2 (priority 1) preempts P1 at $t=1$. P3 has the same priority, so it waits until P2's
+2-tick quantum ends at $t=3$. Then P3 runs, P2 finishes at 5, and P1 at 10. For P1: $T=10-0=10$, $R=0$, $W=10-6=4$.
+Average $W=(4+1+1)/3=2.00$.
+In RR, P3 arrives at $t=2$ and is queued before the preempted P1, because arrivals are handled first.
+All 18 per-process rows (first run, finish, $W$, $R$, $T$) also match ossim's CSV output.
+
+\textbf{Tests in \code{tests/run.sh}} (36 new checks plus the 9 supplied ones):
+\begin{itemize}
+\item the six average triples and six timelines above;
+\item producer/consumer finishes ($2/2$) under all six schedulers;
+\item SJF ties and non-preemption, the SRTF equal-remaining case, and PRIO;
+\item eight MLFQ edge cases: boost order and timing, early vs.\ boundary blocking, preempted quantum, idle boosts;
+\item deadlock: sorted set, printed once, C finishes, and the safe and multi-instance cases.
+\end{itemize}
+
+\section{Terminal output}
+\begin{lstlisting}
+$ make test
+...
+45 passed, 4 skipped (not implemented yet), 0 failed
+$ for s in fcfs rr sjf srtf prio mlfq; do printf '%-5s' $s; ./ossim workloads/cp1_hand.txt --sched $s --quantum 2 --no-paging --gantt | grep '^ *\['; done
+fcfs   [0-5] P1 | [6-8] P2 | [9-9] P3 |
+rr     [0-1] P1 | [2-3] P2 | [4-4] P3 | [5-6] P1 | [7-7] P2 | [8-9] P1 |
+sjf    [0-5] P1 | [6-6] P3 | [7-9] P2 |
+srtf   [0-0] P1 | [1-1] P2 | [2-2] P3 | [3-4] P2 | [5-9] P1 |
+prio   [0-0] P1 | [1-2] P2 | [3-3] P3 | [4-4] P2 | [5-9] P1 |
+mlfq   [0-1] P1 | [2-3] P2 | [4-4] P3 | [5-8] P1 | [9-9] P2 |
+$ ./ossim workloads/deadlock.txt --sched rr --quantum 2 --deadlock-every 5 --max-ticks 60 --no-paging
+DEADLOCK t=15 pids: 1 2
+WARNING: 2 of 3 processes did not finish within 60 ticks (deadlock? starvation? --max-ticks too small?)
+  ticks=60 finished=1/3 aborted=0
+\end{lstlisting}
+Only the last line of \code{make test} is shown; the 4 SKIPs are the Checkpoint~2 LRU, SSTF, SCAN and C-LOOK checks.
+ossim prints inclusive tick labels: \code{[1-2] P2} is the half-open interval 1--3 above. The warning is expected (no recovery).
+
+\section{What does not work yet, and limits}
+\begin{itemize}
+\item Not started (Checkpoint 2): LRU, Clock, SSTF, SCAN, C-LOOK (the 4 SKIPs), the workload generator, the theme.
+\item No deadlock recovery: deadlocked jobs stay blocked until \code{-{}-max-ticks}. With a check every $k$ ticks a deadlock can be reported up to $k-1$ ticks late ($t=12$ vs.\ $t=15$ above).
+\item Detection covers named resources (\code{acquire}/\code{release}), not cycles through semaphores (\code{wait}/\code{signal}).
+\item PRIO has no aging: steady high-priority work can starve a low-priority job. SJF/SRTF use exact burst lengths, no prediction.
+\item The hand-computed averages use a CPU-only workload. Blocking is covered by the MLFQ and producer/consumer checks, but not yet by a hand-computed case with I/O (e.g.\ \code{arrivals.txt}). The checks are evidence, not proof.
+\end{itemize}
+
+\section{Who did what}
+\begin{itemize}
+\item \textbf{Hoang Anh Tu:} implemented SJF, SRTF, PRIO, MLFQ and \code{deadlock\_check()}, designed together with Giang; wrote the Checkpoint~1 tests and workloads, captured the build/test logs, and committed the jointly written code.
+\item \textbf{Vu Hoang Giang:} worked with Tu on the scheduler design, including the MLFQ rules in Section~2, and led the design of deadlock detection and its multi-instance test cases; reviewed this report.
+\item \textbf{Nguyen Quang Huy:} reviewed the scheduler and deadlock code, wrote this report, checked the hand calculations and all figures against the logs, and assembled the submission.
+\end{itemize}
+
+\end{document}
