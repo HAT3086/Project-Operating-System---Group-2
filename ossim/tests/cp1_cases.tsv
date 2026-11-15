@@ -1,0 +1,37 @@
+#kind	description	arguments	expected
+contains	Hand case FCFS averages	workloads/cp1_hand.txt --sched fcfs --quantum 2 --no-paging	avg_turnaround=7.33 avg_waiting=4.00 avg_response=4.00
+contains	Hand case RR averages	workloads/cp1_hand.txt --sched rr --quantum 2 --no-paging	avg_turnaround=6.67 avg_waiting=3.33 avg_response=1.00
+contains	Hand case SJF averages	workloads/cp1_hand.txt --sched sjf --quantum 2 --no-paging	avg_turnaround=6.67 avg_waiting=3.33 avg_response=3.33
+contains	Hand case SRTF averages	workloads/cp1_hand.txt --sched srtf --quantum 2 --no-paging	avg_turnaround=5.00 avg_waiting=1.67 avg_response=0.00
+contains	Hand case PRIO averages	workloads/cp1_hand.txt --sched prio --quantum 2 --no-paging	avg_turnaround=5.33 avg_waiting=2.00 avg_response=0.33
+contains	Hand case MLFQ averages	workloads/cp1_hand.txt --sched mlfq --quantum 2 --no-paging	avg_turnaround=7.00 avg_waiting=3.67 avg_response=1.00
+contains	Hand case FCFS timeline	workloads/cp1_hand.txt --sched fcfs --quantum 2 --no-paging --gantt	[0-5] P1 | [6-8] P2 | [9-9] P3 |
+contains	Hand case RR timeline	workloads/cp1_hand.txt --sched rr --quantum 2 --no-paging --gantt	[0-1] P1 | [2-3] P2 | [4-4] P3 | [5-6] P1 | [7-7] P2 | [8-9] P1 |
+contains	Hand case SJF timeline	workloads/cp1_hand.txt --sched sjf --quantum 2 --no-paging --gantt	[0-5] P1 | [6-6] P3 | [7-9] P2 |
+contains	Hand case SRTF timeline	workloads/cp1_hand.txt --sched srtf --quantum 2 --no-paging --gantt	[0-0] P1 | [1-1] P2 | [2-2] P3 | [3-4] P2 | [5-9] P1 |
+contains	Hand case PRIO timeline	workloads/cp1_hand.txt --sched prio --quantum 2 --no-paging --gantt	[0-0] P1 | [1-2] P2 | [3-3] P3 | [4-4] P2 | [5-9] P1 |
+contains	Hand case MLFQ timeline	workloads/cp1_hand.txt --sched mlfq --quantum 2 --no-paging --gantt	[0-1] P1 | [2-3] P2 | [4-4] P3 | [5-8] P1 | [9-9] P2 |
+contains	Producer/consumer FCFS	workloads/producer_consumer.txt --sched fcfs --quantum 2 --no-paging	finished=2/2
+contains	Producer/consumer RR	workloads/producer_consumer.txt --sched rr --quantum 2 --no-paging	finished=2/2
+contains	Producer/consumer SJF	workloads/producer_consumer.txt --sched sjf --quantum 2 --no-paging	finished=2/2
+contains	Producer/consumer SRTF	workloads/producer_consumer.txt --sched srtf --quantum 2 --no-paging	finished=2/2
+contains	Producer/consumer PRIO	workloads/producer_consumer.txt --sched prio --quantum 2 --no-paging	finished=2/2
+contains	Producer/consumer MLFQ	workloads/producer_consumer.txt --sched mlfq --quantum 2 --no-paging	finished=2/2
+contains	SJF FIFO ties and non-preemption	workloads/cp1_ties.txt --sched sjf --no-paging --gantt	[0-3] P1 | [4-6] P2 | [7-9] P3 |
+contains	SRTF equal remaining time keeps CPU	workloads/cp1_ties.txt --sched srtf --no-paging --gantt	[0-3] P1 | [4-6] P2 | [7-9] P3 |
+contains	PRIO lower priority waits for higher peers	workloads/cp1_ties.txt --sched prio --quantum 2 --no-paging --gantt	[0-1] P1 | [2-3] P2 | [4-5] P1 | [6-6] P2 | [7-9] P3 |
+contains	MLFQ level budgets and boost queue order	workloads/cp1_mlfq_boost.txt --sched mlfq --quantum 2 --no-paging --gantt	[0-1] P1 | [2-3] P2 | [4-7] P1 | [8-11] P2 | [12-19] P1 | [20-21] P2 | [22-23] P1 | [24-27] P2 | [28-31] P1 | [32-39] P2 |
+once	MLFQ boost occurs exactly once before t=40	workloads/cp1_mlfq_boost.txt --sched mlfq --quantum 2 --no-paging --trace	MLFQ boost:
+contains	MLFQ promotes blocked jobs	workloads/cp1_mlfq_block.txt --sched mlfq --quantum 2 --no-paging --gantt	[0-1] P1 | [2-3] P2 | [4-5] P1 | [6-30] P2 | [31-33] P1 | [34-36] P2 |
+contains	MLFQ preserves quantum after higher-level preemption	workloads/cp1_mlfq_interrupt.txt --sched mlfq --quantum 2 --no-paging --trace	[t=    6] MLFQ P1 exhausted quantum, level 2
+contains	MLFQ blocking at full quantum still demotes	workloads/cp1_mlfq_boundary.txt --sched mlfq --quantum 2 --no-paging --gantt	[0-1] P1 | [2-3] P2 | [4-4] P1 | [5-5] P2 |
+contains	MLFQ early block retains level and resets budget	workloads/cp1_mlfq_early.txt --sched mlfq --quantum 2 --no-paging --gantt	[0-0] P1 | [1-2] P2 | [3-4] P1 | [5-8] P2 | [9-9] P1 |
+contains	MLFQ boosts during CPU idle	workloads/cp1_mlfq_idle.txt --sched mlfq --quantum 2 --no-paging --trace	[t=   20] MLFQ boost: all processes to level 0
+contains	MLFQ idle boost resets blocked job level	workloads/cp1_mlfq_idle.txt --sched mlfq --quantum 2 --no-paging --trace	[t=   28] MLFQ P1 exhausted quantum, level 1
+contains	Deadlock reports exact sorted A/B set	workloads/deadlock.txt --sched rr --quantum 2 --deadlock-every 5 --max-ticks 60 --no-paging	DEADLOCK t=15 pids: 1 2
+once	Persistent deadlock is not repeatedly printed	workloads/deadlock.txt --sched rr --quantum 2 --deadlock-every 5 --max-ticks 60 --no-paging	DEADLOCK
+contains	Deadlock leaves independent C able to finish	workloads/deadlock.txt --sched rr --quantum 2 --deadlock-every 5 --max-ticks 60 --no-paging	finished=1/3
+contains	Safe multi-instance resource workload finishes	workloads/cp1_resources_safe.txt --sched rr --quantum 1 --deadlock-every 1 --max-ticks 30 --no-paging	finished=2/2
+absent	Temporary resource waiting is not deadlock	workloads/cp1_resources_safe.txt --sched rr --quantum 1 --deadlock-every 1 --max-ticks 30 --no-paging	DEADLOCK
+contains	Multi-instance deadlock excludes zero-allocation waiter	workloads/cp1_resources_deadlock.txt --sched rr --quantum 1 --deadlock-every 1 --max-ticks 20 --no-paging	DEADLOCK t=3 pids: 1 2
+once	Multi-instance deadlock reports once	workloads/cp1_resources_deadlock.txt --sched rr --quantum 1 --deadlock-every 1 --max-ticks 20 --no-paging	DEADLOCK

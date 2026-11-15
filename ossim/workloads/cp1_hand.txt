@@ -1,0 +1,14 @@
+# Small independent hand calculation, all policies, q=2, --no-paging.
+# P1: arrival=0, CPU=6, priority=2
+# P2: arrival=1, CPU=3, priority=1
+# P3: arrival=2, CPU=1, priority=1
+# Full schedules and calculations: CP1_REPORTING_GUIDE.md.
+process P1 arrive=0 prio=2 pages=1
+    cpu 6
+end
+process P2 arrive=1 prio=1 pages=1
+    cpu 3
+end
+process P3 arrive=2 prio=1 pages=1
+    cpu 1
+end

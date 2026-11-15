@@ -1,0 +1,18 @@
+
+=== ossim report: workloads/cp1_hand.txt | sched=srtf q=2 | paging=off frames=64 replace=fifo | disk=fcfs cyl=200 head0=0 ===
+pid  name        arrive   first  finish turnaround  waiting response    cpu faults   disk
+1    P1               0       0      10         10        4        0      6      0      0
+2    P2               1       1       5          4        1        0      3      0      0
+3    P3               2       2       3          1        0        0      1      0      0
+
+CPU timeline (pid, 0 = idle, K = kernel/page-fault handling):
+  [0-0] P1 | [1-1] P2 | [2-2] P3 | [3-4] P2 | [5-9] P1 | 
+
+summary
+  ticks=10 finished=3/3 aborted=0
+  cpu_busy=10 cpu_idle=0 cpu_kernel=0 utilization=100.00%
+  throughput=0.3000 procs/tick context_switches=5
+  avg_turnaround=5.00 avg_waiting=1.67 avg_response=0.00
+  mem_refs=0 page_faults=0 evictions=0 fault_rate=0.0000 frame_waits=0
+  disk_requests=0 head_movement=0 avg_disk_wait=0.00 head=0
+  avg_fault_service=0.00

@@ -1,0 +1,9 @@
+# q=2: both jobs reach level 2; a boost at t=20 must rotate to P2.
+# Half-open intervals: P1 0-2, P2 2-4, P1 4-8, P2 8-12,
+# P1 12-20, P2 20-22, P1 22-24, P2 24-28, P1 28-32, P2 32-40.
+process P1 arrive=0 pages=1
+    cpu 20
+end
+process P2 arrive=0 pages=1
+    cpu 20
+end

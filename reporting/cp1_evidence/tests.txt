@@ -1,0 +1,52 @@
+sh tests/run.sh
+PASS  FCFS textbook example: avg waiting 17.00
+PASS  RR q=4 textbook example: avg waiting 5.67
+PASS  RR q=4: context switches = 4 (P1,P2,P3,P1)
+PASS  Paging: P1 alone, FIFO, 3 frames -> 15 faults (textbook Sec. 10.4.2)
+PASS  Disk: FCFS, head 53 -> 640 cylinders (textbook Sec. 11.2.1)
+PASS  Producer/consumer completes
+PASS  Deadlock workload without detection: A and B stall, C finishes
+PASS  Mixed workload finishes
+PASS  Mixed workload finishes with 1 frame (faults wait for a frame)
+PASS  Hand case FCFS averages
+PASS  Hand case RR averages
+PASS  Hand case SJF averages
+PASS  Hand case SRTF averages
+PASS  Hand case PRIO averages
+PASS  Hand case MLFQ averages
+PASS  Hand case FCFS timeline
+PASS  Hand case RR timeline
+PASS  Hand case SJF timeline
+PASS  Hand case SRTF timeline
+PASS  Hand case PRIO timeline
+PASS  Hand case MLFQ timeline
+PASS  Producer/consumer FCFS
+PASS  Producer/consumer RR
+PASS  Producer/consumer SJF
+PASS  Producer/consumer SRTF
+PASS  Producer/consumer PRIO
+PASS  Producer/consumer MLFQ
+PASS  SJF FIFO ties and non-preemption
+PASS  SRTF equal remaining time keeps CPU
+PASS  PRIO lower priority waits for higher peers
+PASS  MLFQ level budgets and boost queue order
+PASS  MLFQ boost occurs exactly once before t=40
+PASS  MLFQ promotes blocked jobs
+PASS  MLFQ preserves quantum after higher-level preemption
+PASS  MLFQ blocking at full quantum still demotes
+PASS  MLFQ early block retains level and resets budget
+PASS  MLFQ boosts during CPU idle
+PASS  MLFQ idle boost resets blocked job level
+PASS  Deadlock reports exact sorted A/B set
+PASS  Persistent deadlock is not repeatedly printed
+PASS  Deadlock leaves independent C able to finish
+PASS  Safe multi-instance resource workload finishes
+PASS  Temporary resource waiting is not deadlock
+PASS  Multi-instance deadlock excludes zero-allocation waiter
+PASS  Multi-instance deadlock reports once
+SKIP  Paging: LRU, 3 frames -> 12 faults (textbook Sec. 10.4.4)
+SKIP  Disk: SSTF, head 53 -> 236
+SKIP  Disk: SCAN moving down, head 53 -> 236
+SKIP  Disk: C-LOOK moving up, head 53 -> 322
+---
+45 passed, 4 skipped (not implemented yet), 0 failed

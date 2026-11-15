@@ -1,0 +1,8 @@
+# At t=3 P2 interrupts P1 partway through its level-1 quantum.
+# P1 must retain the 1 tick used; it exhausts level 1 at t=7 (after tick 6).
+process P1 arrive=0 pages=1
+    cpu 12
+end
+process P2 arrive=3 pages=1
+    cpu 1
+end
